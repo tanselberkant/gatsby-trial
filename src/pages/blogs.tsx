@@ -5,9 +5,15 @@ import { graphql } from 'gatsby';
 
 interface BlogsPageProps {
   data: {
-    allFile: {
+    allMdx: {
       nodes: {
-        name: string;
+        frontmatter: {
+          date: string;
+          title: string;
+          slug: string;
+        };
+        id: string;
+        excerpt: string;
       }[];
     };
   };
@@ -16,13 +22,15 @@ interface BlogsPageProps {
 const BlogsPage: React.FC<BlogsPageProps> = ({ data }) => {
   return (
     <Layout pageTitle="My Blog Posts">
-      <ul>
-        {data.allFile.nodes.map((post: any) => (
-          <li className="  bg-purple-300 w-full my-2" key={post.name}>
-            {post.name}
-          </li>
-        ))}
-      </ul>
+      {data.allMdx.nodes.map((node) => (
+        <article key={node.id} className="my-4 border-2 border-purple-400 px-2">
+          <div className="flex items-center">
+            <h2 className="font-bold text-lg">{node.frontmatter.title}</h2>
+            <p className="ml-2">Posted: {node.frontmatter.date}</p>
+          </div>
+          <p>{node.excerpt}</p>
+        </article>
+      ))}
     </Layout>
   );
 };
@@ -33,9 +41,15 @@ export default BlogsPage;
 
 export const query = graphql`
   query {
-    allFile(filter: { sourceInstanceName: { eq: "blog" } }) {
+    allMdx(sort: { frontmatter: { date: DESC } }) {
       nodes {
-        name
+        frontmatter {
+          date(formatString: "MMMM D, YYYY")
+          title
+          slug
+        }
+        id
+        excerpt
       }
     }
   }
